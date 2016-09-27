@@ -1,8 +1,28 @@
-# Caffe
+# Caffe for HSI classification
 
-Caffe is a deep learning framework developed with cleanliness, readability, and speed in mind.<br />
-Consult the [project website](http://caffe.berkeleyvision.org) for all documentation.
+This is a fork of Caffe which is modifed for hyperspectral image classification. If you want more details about CNN based HSI classification, please reference our publication:
 
+>@article{Yu2016,
+>author = "Shiqi Yu and Sen Jia and Chunyan Xu",
+>title = "Convolutional neural networks for hyperspectral image classification ",
+>journal = "Neurocomputing ",
+>volume = "",
+>number = "",
+>pages = " - ",
+>year = "2016",
+>note = "",
+>issn = "0925-2312",
+>doi = "http://dx.doi.org/10.1016/j.neucom.2016.09.010",
+>url = "http://www.sciencedirect.com/science/article/pii/S0925231216310104",
+>}
 
-Please ask usage questions and how to model different tasks on the [caffe-users mailing list](https://groups.google.com/forum/#!forum/caffe-users).
+Files added
+----------
+* hsi/
+* tools/convert_hsi_imageset.cpp
+
+See also
+----------
+Please visit http://caffe.berkeleyvision.org for more documentation about Caffe.
+
 
