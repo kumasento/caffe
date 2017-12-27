@@ -1,5 +1,3 @@
-#include <cstring>
-
 #include "gtest/gtest.h"
 
 #include "caffe/filler.hpp"
@@ -31,7 +29,7 @@ TYPED_TEST(ConstantFillerTest, TestFill) {
   const int count = this->blob_->count();
   const TypeParam* data = this->blob_->cpu_data();
   for (int i = 0; i < count; ++i) {
-    EXPECT_GE(data[i], this->filler_param_.value());
+    EXPECT_EQ(data[i], this->filler_param_.value());
   }
 }
 
@@ -140,6 +138,145 @@ TYPED_TEST(GaussianFillerTest, TestFill) {
   TypeParam target_var = this->filler_param_.std() * this->filler_param_.std();
   EXPECT_GE(var, target_var / 5.);
   EXPECT_LE(var, target_var * 5.);
+}
+
+template <typename Dtype>
+class XavierFillerTest : public ::testing::Test {
+ protected:
+  XavierFillerTest()
+      : blob_(new Blob<Dtype>(1000, 2, 4, 5)),
+        filler_param_() {
+  }
+  virtual void test_params(FillerParameter_VarianceNorm variance_norm,
+      Dtype n) {
+    this->filler_param_.set_variance_norm(variance_norm);
+    this->filler_.reset(new XavierFiller<Dtype>(this->filler_param_));
+    this->filler_->Fill(blob_);
+    EXPECT_TRUE(this->blob_);
+    const int count = this->blob_->count();
+    const Dtype* data = this->blob_->cpu_data();
+    Dtype mean = 0.;
+    Dtype ex2 = 0.;
+    for (int i = 0; i < count; ++i) {
+      mean += data[i];
+      ex2 += data[i] * data[i];
+    }
+    mean /= count;
+    ex2 /= count;
+    Dtype std = sqrt(ex2 - mean*mean);
+    Dtype target_std = sqrt(2.0 / n);
+    EXPECT_NEAR(mean, 0.0, 0.1);
+    EXPECT_NEAR(std, target_std, 0.1);
+  }
+  virtual ~XavierFillerTest() { delete blob_; }
+  Blob<Dtype>* const blob_;
+  FillerParameter filler_param_;
+  shared_ptr<XavierFiller<Dtype> > filler_;
+};
+
+TYPED_TEST_CASE(XavierFillerTest, TestDtypes);
+
+TYPED_TEST(XavierFillerTest, TestFillFanIn) {
+  TypeParam n = 2*4*5;
+  this->test_params(FillerParameter_VarianceNorm_FAN_IN, n);
+}
+TYPED_TEST(XavierFillerTest, TestFillFanOut) {
+  TypeParam n = 1000*4*5;
+  this->test_params(FillerParameter_VarianceNorm_FAN_OUT, n);
+}
+TYPED_TEST(XavierFillerTest, TestFillAverage) {
+  TypeParam n = (2*4*5 + 1000*4*5) / 2.0;
+  this->test_params(FillerParameter_VarianceNorm_AVERAGE, n);
+}
+
+template <typename Dtype>
+class MSRAFillerTest : public ::testing::Test {
+ protected:
+  MSRAFillerTest()
+      : blob_(new Blob<Dtype>(1000, 2, 4, 5)),
+        filler_param_() {
+  }
+  virtual void test_params(FillerParameter_VarianceNorm variance_norm,
+      Dtype n) {
+    this->filler_param_.set_variance_norm(variance_norm);
+    this->filler_.reset(new MSRAFiller<Dtype>(this->filler_param_));
+    this->filler_->Fill(blob_);
+    EXPECT_TRUE(this->blob_);
+    const int count = this->blob_->count();
+    const Dtype* data = this->blob_->cpu_data();
+    Dtype mean = 0.;
+    Dtype ex2 = 0.;
+    for (int i = 0; i < count; ++i) {
+      mean += data[i];
+      ex2 += data[i] * data[i];
+    }
+    mean /= count;
+    ex2 /= count;
+    Dtype std = sqrt(ex2 - mean*mean);
+    Dtype target_std = sqrt(2.0 / n);
+    EXPECT_NEAR(mean, 0.0, 0.1);
+    EXPECT_NEAR(std, target_std, 0.1);
+  }
+  virtual ~MSRAFillerTest() { delete blob_; }
+  Blob<Dtype>* const blob_;
+  FillerParameter filler_param_;
+  shared_ptr<MSRAFiller<Dtype> > filler_;
+};
+
+TYPED_TEST_CASE(MSRAFillerTest, TestDtypes);
+
+TYPED_TEST(MSRAFillerTest, TestFillFanIn) {
+  TypeParam n = 2*4*5;
+  this->test_params(FillerParameter_VarianceNorm_FAN_IN, n);
+}
+TYPED_TEST(MSRAFillerTest, TestFillFanOut) {
+  TypeParam n = 1000*4*5;
+  this->test_params(FillerParameter_VarianceNorm_FAN_OUT, n);
+}
+TYPED_TEST(MSRAFillerTest, TestFillAverage) {
+  TypeParam n = (2*4*5 + 1000*4*5) / 2.0;
+  this->test_params(FillerParameter_VarianceNorm_AVERAGE, n);
+}
+
+template <typename Dtype>
+class BilinearFillerTest : public ::testing::Test {
+ protected:
+  BilinearFillerTest() : filler_param_() {}
+  virtual void test_params(const int n) {
+    this->blob_ = new Blob<Dtype>(1000, 2, n, n);
+    this->filler_.reset(new BilinearFiller<Dtype>(this->filler_param_));
+    this->filler_->Fill(blob_);
+    EXPECT_TRUE(this->blob_);
+    const int outer_num = this->blob_->count(0, 2);
+    const int inner_num = this->blob_->count(2, 4);
+    const Dtype* data = this->blob_->cpu_data();
+    int f = ceil(this->blob_->width() / 2.);
+    Dtype c = (this->blob_->width() - 1) / (2. * f);
+    for (int i = 0; i < outer_num; ++i) {
+      for (int j = 0; j < inner_num; ++j) {
+        Dtype x = j % this->blob_->width();
+        Dtype y = (j / this->blob_->width()) % this->blob_->height();
+        Dtype expected_value = (1 - fabs(x / f - c)) * (1 - fabs(y / f - c));
+        const Dtype actual_value = data[i * inner_num + j];
+        EXPECT_NEAR(expected_value, actual_value, 0.01);
+      }
+    }
+  }
+  virtual ~BilinearFillerTest() { delete blob_; }
+  Blob<Dtype>* blob_;
+  FillerParameter filler_param_;
+  shared_ptr<BilinearFiller<Dtype> > filler_;
+};
+
+TYPED_TEST_CASE(BilinearFillerTest, TestDtypes);
+
+TYPED_TEST(BilinearFillerTest, TestFillOdd) {
+  const int n = 7;
+  this->test_params(n);
+}
+TYPED_TEST(BilinearFillerTest, TestFillEven) {
+  const int n = 6;
+  this->test_params(n);
 }
 
 }  // namespace caffe
