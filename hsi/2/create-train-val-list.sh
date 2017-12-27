@@ -20,8 +20,9 @@ do
 		count=0;
 	        echo $PWD	
 		#for each sample in the randomized list (randomized by command 'sort -R')
-		for ff in `find samples/ -type f -name "pixel5x5-cls${labelid}-*-0.bin" | sort -R`
+		for ff in `find ../samples/ -type f -name "pixel5x5-cls${labelid}-*-0.bin" | sort -R`
 		do
+                        ff="$(echo $ff | cut -d"/" -f2-)"
 			#for different number of train samples
 			for ((train_num=3; train_num<=15; train_num++))
 			do
@@ -29,17 +30,17 @@ do
 				if [ $count -lt $train_num ]
 				then
 					fileid=${ff%-?.bin}
-					echo "${fileid}-0.bin $readid" >> train-val-list/t${train_num}-rand${randid}-train.dat
-					echo "${fileid}-1.bin $readid" >> train-val-list/t${train_num}-rand${randid}-train.dat
-					echo "${fileid}-2.bin $readid" >> train-val-list/t${train_num}-rand${randid}-train.dat
-					echo "${fileid}-3.bin $readid" >> train-val-list/t${train_num}-rand${randid}-train.dat
-					echo "${fileid}-4.bin $readid" >> train-val-list/t${train_num}-rand${randid}-train.dat
-					echo "${fileid}-5.bin $readid" >> train-val-list/t${train_num}-rand${randid}-train.dat
-					echo "${fileid}-6.bin $readid" >> train-val-list/t${train_num}-rand${randid}-train.dat
-					echo "${fileid}-7.bin $readid" >> train-val-list/t${train_num}-rand${randid}-train.dat
+					echo "${fileid}-0.bin $readid" >> ../train-val-list/t${train_num}-rand${randid}-train.dat
+					echo "${fileid}-1.bin $readid" >> ../train-val-list/t${train_num}-rand${randid}-train.dat
+					echo "${fileid}-2.bin $readid" >> ../train-val-list/t${train_num}-rand${randid}-train.dat
+					echo "${fileid}-3.bin $readid" >> ../train-val-list/t${train_num}-rand${randid}-train.dat
+					echo "${fileid}-4.bin $readid" >> ../train-val-list/t${train_num}-rand${randid}-train.dat
+					echo "${fileid}-5.bin $readid" >> ../train-val-list/t${train_num}-rand${randid}-train.dat
+					echo "${fileid}-6.bin $readid" >> ../train-val-list/t${train_num}-rand${randid}-train.dat
+					echo "${fileid}-7.bin $readid" >> ../train-val-list/t${train_num}-rand${randid}-train.dat
 				#write file names to the validation/testing sample list
 				else
-					echo "$ff $readid">> train-val-list/t${train_num}-rand${randid}-val.dat
+					echo "$ff $readid">> ../train-val-list/t${train_num}-rand${randid}-val.dat
 				fi
 			done
 
