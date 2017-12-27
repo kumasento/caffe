@@ -12,7 +12,7 @@
 for ((randid=1; randid<=10; randid++))
 do
 	#for each class
-        for ((labelid=1; labelid<=16; labelid++))
+        for ((labelid=1; labelid<=###@1###; labelid++))
         do
 		((readid=labelid-1));
 		echo  "$labelid "

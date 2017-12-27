@@ -3,23 +3,10 @@
 %Each file stores a sample which is a 5x5xN matrix
 
 outputdir='../samples/';
-% %%%%%%%%%%  Salinas  %%%%%%%%%%%%%%%%%
-% load('../public-data/Salinas_corrected.mat');
-% load('../public-data/Salinas_gt.mat');
-% hsi=salinas_corrected;
-% gt=salinas_gt;
-
-%%%%%%%%%%  Indian  %%%%%%%%%%%%%%%%%
-load('../public-data/Indian_pines_corrected.mat');
-load('../public-data/Indian_pines_gt.mat');
-hsi=indian_pines_corrected;
-gt=indian_pines_gt;
-
-%%%%%%%%%%  PaviaU  %%%%%%%%%%%%%%%%%
-%load('../public-data/PaviaU.mat');
-%load('../public-data/Pavia_gt.mat');
-%hsi=paviaU;
-%gt=pavia_gt;
+load('../public-data/###@2###');
+load('../public-data/###@3###');
+hsi=###@4###;
+gt=###@5###;
 
 %normalize cube
 cube = zeros(size(hsi));
@@ -31,7 +18,7 @@ end
 %convert the values in range [0,255] and store the data in UINT8 format
 cube = uint8(cube * 255);
 
-for labelid=1:16 %for each class
+for labelid=1:###@1### %for each class
     %find the positions for pixels of class 'labelid'
     [rowidx, colidx] = find(gt == labelid);
     
