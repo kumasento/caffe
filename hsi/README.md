@@ -2,15 +2,15 @@
 
 directory structure
 ---------------------
-1              = contians files to convert raw data from .mat to bin sample files
-2              = contians files to generate train and val list text files
-3              = contians files to convert bin to lmdb dataset
-4              = contians files for defining network and training
-databases      = contains lmdb datasets
-public-data    = contains raw data in .mat format
-samples        = contains the generated bin sample files
-train-val-list = contains the generated train and val list text files
-configure      = used to configure settings before training the network (see below)
+*1              = contians files to convert raw data from .mat to bin sample files
+*2              = contians files to generate train and val list text files
+*3              = contians files to convert bin to lmdb dataset
+*4              = contians files for defining network and training
+*databases      = contains lmdb datasets
+*public-data    = contains raw data in .mat format
+*samples        = contains the generated bin sample files
+*train-val-list = contains the generated train and val list text files
+*configure      = used to configure settings before training the network (see below)
 
 installation
 -------------
